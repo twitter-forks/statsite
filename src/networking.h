@@ -37,11 +37,6 @@ int shutdown_networking(statsite_networking *netconf);
  */
 
 /**
- * Closes the client connection.
- */
-void close_client_connection(statsite_conn_info *conn);
-
-/**
  * This method is used to conveniently extract commands from the
  * command buffer. It scans up to a terminator, and then sets the
  * buf to the start of the buffer, and buf_len to the length
