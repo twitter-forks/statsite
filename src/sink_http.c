@@ -11,6 +11,7 @@
 #include "sink.h"
 #include "strbuf.h"
 
+const int DEFAULT_WORKERS = 4;
 const int QUEUE_MAX_SIZE = 10 * 1024 * 1024; /* 10 MB of data */
 const int DEFAULT_TIMEOUT_SECONDS = 30;
 const useconds_t FAILURE_WAIT = 5000000; /* 5 seconds */
@@ -24,7 +25,8 @@ const char* OAUTH2_GRANT = "grant_type=client_credentials";
 struct http_sink {
     sink sink;
     lifoq* queue;
-    pthread_t worker;
+    pthread_t* worker;
+    pthread_mutex_t sink_mutex;
     char* oauth_bearer;
 };
 
@@ -273,7 +275,6 @@ static int oauth2_get_token(const sink_config_http* httpconfig, struct http_sink
     else
         ssl_ciphers = curl_which_ssl();
 
-
     CURL* curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_URL, httpconfig->oauth_token_url);
     http_curl_basic_setup(curl, httpconfig, NULL, error_buffer, recv_buf, ssl_ciphers);
@@ -289,7 +290,7 @@ static int oauth2_get_token(const sink_config_http* httpconfig, struct http_sink
 
     int recv_len;
     char* recv_data = strbuf_get(recv_buf, &recv_len);
-    printf("DATA: %s\n", recv_data);
+
     if (http_code != 200 || rcurl != CURLE_OK) {
         syslog(LOG_ERR, "HTTP auth: error %d: %s %s", rcurl, error_buffer, recv_data);
         usleep(FAILURE_WAIT);
@@ -313,7 +314,6 @@ static int oauth2_get_token(const sink_config_http* httpconfig, struct http_sink
     }
 
 exit:
-
     curl_easy_cleanup(curl);
     free(error_buffer);
     strbuf_free(recv_buf, true);
@@ -351,18 +351,21 @@ static void* http_worker(void* arg) {
         if (ret == LIFOQ_CLOSED)
             goto exit;
 
+        /* Hold the sink mutex for any state, such as auth cookies,
+         * which may be mutated by more than one worker. */
+        pthread_mutex_lock(&s->sink_mutex);
+        /* Grab the current oauth bearer value so we know
+           if it has changed after our request */
+        const char* last_bearer = s->oauth_bearer;
+
         if (should_authenticate && s->oauth_bearer == NULL) {
             if (!oauth2_get_token(httpconfig, s)) {
                 if (lifoq_push(s->queue, data, data_size, true, true))
                     syslog(LOG_ERR, "HTTP: dropped data due to queue full of closed");
+                pthread_mutex_unlock(&s->sink_mutex);
                 continue;
             }
         }
-
-        memset(error_buffer, 0, CURL_ERROR_SIZE+1);
-        CURL* curl = curl_easy_init();
-        curl_easy_setopt(curl, CURLOPT_URL, httpconfig->post_url);
-
         /* Build headers */
         struct curl_slist* headers = NULL;
         headers = curl_slist_append(headers, "Connection: close");
@@ -374,6 +377,13 @@ static void* http_worker(void* arg) {
             sprintf(bearer_header, "Authorization: Bearer %s", s->oauth_bearer);
             headers = curl_slist_append(headers, bearer_header);
         }
+
+        /* Release the lock after all current state has been read */
+        pthread_mutex_unlock(&s->sink_mutex);
+
+        memset(error_buffer, 0, CURL_ERROR_SIZE+1);
+        CURL* curl = curl_easy_init();
+        curl_easy_setopt(curl, CURLOPT_URL, httpconfig->post_url);
 
         http_curl_basic_setup(curl, httpconfig, headers, error_buffer, recv_buf, ssl_ciphers);
 
@@ -397,10 +407,13 @@ static void* http_worker(void* arg) {
                 syslog(LOG_ERR, "HTTP: dropped data due to queue full of closed");
 
             /* Remove any authentication token - this will cause us to get a new one */
-            if (s->oauth_bearer) {
+            pthread_mutex_lock(&s->sink_mutex);
+            if (s->oauth_bearer && s->oauth_bearer == last_bearer) {
+                syslog(LOG_NOTICE, "HTTP: clearing Oauth bearer token");
                 free(s->oauth_bearer);
                 s->oauth_bearer = NULL;
             }
+            pthread_mutex_unlock(&s->sink_mutex);
 
             usleep(FAILURE_WAIT);
         } else {
@@ -422,7 +435,8 @@ exit:
 static void close_sink(struct http_sink* s) {
     lifoq_close(s->queue);
     void* retval;
-    pthread_join(s->worker, &retval);
+    for (int i = 0; i < DEFAULT_WORKERS; i++)
+        pthread_join(s->worker[i], &retval);
     syslog(LOG_NOTICE, "HTTP: sink closed down with status %ld", (intptr_t)retval);
     return;
 }
@@ -433,9 +447,13 @@ sink* init_http_sink(const sink_config_http* sc, const statsite_config* config) 
     s->sink.global_config = config;
     s->sink.command = (int (*)(sink*, metrics*, void*))serialize_metrics;
     s->sink.close = (void (*)(sink*))close_sink;
+    s->worker = malloc(sizeof(pthread_t) * DEFAULT_WORKERS);
+
+    pthread_mutex_init(&s->sink_mutex, NULL);
 
     lifoq_new(&s->queue, QUEUE_MAX_SIZE);
-    pthread_create(&s->worker, NULL, http_worker, (void*)s);
+    for (int i = 0; i < DEFAULT_WORKERS; i++)
+        pthread_create(&s->worker[i], NULL, http_worker, (void*)s);
 
     return (sink*)s;
 }
