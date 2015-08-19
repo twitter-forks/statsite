@@ -563,8 +563,6 @@ EV_API_DECL struct ev_loop *ev_default_loop_ptr;
 EV_INLINE struct ev_loop *
 ev_default_loop_uc_ (void) EV_THROW
 {
-  extern struct ev_loop *ev_default_loop_ptr;
-
   return ev_default_loop_ptr;
 }
 
