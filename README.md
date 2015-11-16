@@ -99,20 +99,25 @@ available usually through a system package manager. Steps:
     $ pip install --egg SCons  # Uses the Scons build system, may not be necessary
     $ make
     $ ./statsite
+
+Explicit list of Dependencies (all must be installed before attempting to build):
+
+ 1. jansson - If you don't have jansson installed (http://www.digip.org/jansson/)
+  On Ubuntu:
+    $ sudo apt-get install libjansson4 libjansson-dev
+  On MacOS:
+    $ brew install jansson
+
+ 2. inih
     
-    Explicit list of Dependencies (all must be installed):
+
+ 3. libev (included in this repo)
+  
+ 4. murmurhash (included in this repo)
     
-    jansson - If you don't have Jansson installed - TODO(aasta/hhuang): install instructions for jansson
+ 5. libcurl (included in this repo)
     
-    inih -
-    
-    libev -
-    
-    murmurhash -
-    
-    libcurl -
-    
-    libcheck - (Needed to build / run unit tests)
+ 6. libcheck - (Needed to build / run unit tests)
 
 
 Building the test code may generate errors if libcheck is not available.
