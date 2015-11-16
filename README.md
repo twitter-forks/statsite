@@ -102,29 +102,28 @@ available usually through a system package manager. Steps:
 
 Explicit list of Dependencies (all must be installed before attempting to build):
 
- 1. jansson - If you don't have jansson installed (http://www.digip.org/jansson/)
-  On Ubuntu:
+ 1. jansson - If you do not have jansson installed (http://www.digip.org/jansson/)
+  On Ubuntu
 
     $ sudo apt-get install libjansson4 libjansson-dev
 
-  On MacOS:
+  On MacOS
 
     $ brew install jansson
 
  2. inih
-    
 
  3. libev (included in this repo)
   
  4. murmurhash (included in this repo)
-    
+ 
  5. libcurl (included in this repo)
-    
+ 
  6. libcheck - (Needed to build / run unit tests)
 
 
 Building the test code may generate errors if libcheck is not available.
-To build the test code successfully, do the following::
+To build the test code successfully, do the following:
 
     $ make test
 
