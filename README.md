@@ -103,13 +103,14 @@ available usually through a system package manager. Steps:
 Explicit list of Dependencies (all must be installed before attempting to build):
 
  1. jansson - If you do not have jansson installed (http://www.digip.org/jansson/)
+ 
   On Ubuntu
 
-    $ sudo apt-get install libjansson4 libjansson-dev
+  `$ sudo apt-get install libjansson4 libjansson-dev`
 
   On MacOS
 
-    $ brew install jansson
+  `$ brew install jansson`
 
  2. inih
 
