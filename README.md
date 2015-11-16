@@ -99,20 +99,20 @@ available usually through a system package manager. Steps:
     $ pip install --egg SCons  # Uses the Scons build system, may not be necessary
     $ make
     $ ./statsite
-
-Explicit list of Dependencies (all must be installed):
-
-jansson - If you don't have Jansson installed - TODO(aasta/hhuang): install instructions for jansson
-
-inih -
-
-libev -
-
-murmurhash -
-
-libcurl -
-
-libcheck - (Needed to build / run unit tests)
+    
+    Explicit list of Dependencies (all must be installed):
+    
+    jansson - If you don't have Jansson installed - TODO(aasta/hhuang): install instructions for jansson
+    
+    inih -
+    
+    libev -
+    
+    murmurhash -
+    
+    libcurl -
+    
+    libcheck - (Needed to build / run unit tests)
 
 
 Building the test code may generate errors if libcheck is not available.
