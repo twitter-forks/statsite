@@ -92,36 +92,56 @@ Install [BROKEN/INCOMPLETE]
 -------
 
 Download and build from source. This requires `scons` to be available,
-available usually through a system package manager. Steps:
+available usually through a system package manager. 
+
+**Library Dependencies**
+
+List of Dependencies (all must be installed before attempting to build):
+
+ 1. jansson - (http://www.digip.org/jansson/)
+ 
+  On Ubuntu
+ ```
+ $ sudo apt-get install libjansson4 libjansson-dev
+ ```
+
+  On MacOS
+ ```
+ $ brew install jansson
+ ```
+
+ 2. inih (included in this repo, correctly reference in SConstruct buildfile - *no action needed*)
+
+  https://github.com/twitter-forks/statsite/tree/master/deps/inih
+
+ 3. libev (included in this repo, correctly reference in SConstruct buildfile - *no action needed*)
+ 
+  https://github.com/twitter-forks/statsite/tree/master/deps/libev
+  
+ 4. murmurhash (included in this repo, correctly reference in SConstruct buildfile - *no action needed*)
+ 
+  https://github.com/twitter-forks/statsite/tree/master/deps/murmurhash
+ 
+ 5. libcurl (it *should* be pre-installed on most linux distros and is installed on MacOS with XCode):
+  
+  On Ubuntu (if needed)
+
+ ```
+ $ sudo apt-get install libcurl4-gnutls-dev
+ $ sudo apt-get install libcurl4-openssl-dev
+ ```
+
+ 6. libcheck - (Needed to build / run unit tests)
+ 
+  platform specific install instructions for check unit test framework: http://check.sourceforge.net/web/install.html
+
+**Build Steps:**
 
     $ git clone https://github.com/twitter-forks/statsite.git
     $ cd statsite
     $ pip install --egg SCons  # Uses the Scons build system, may not be necessary
     $ make
     $ ./statsite
-
-Explicit list of Dependencies (all must be installed before attempting to build):
-
- 1. jansson - If you do not have jansson installed (http://www.digip.org/jansson/)
- 
-  On Ubuntu
-
-  `$ sudo apt-get install libjansson4 libjansson-dev`
-
-  On MacOS
-
-  `$ brew install jansson`
-
- 2. inih
-
- 3. libev (included in this repo)
-  
- 4. murmurhash (included in this repo)
- 
- 5. libcurl (included in this repo)
- 
- 6. libcheck - (Needed to build / run unit tests)
-
 
 Building the test code may generate errors if libcheck is not available.
 To build the test code successfully, do the following:
