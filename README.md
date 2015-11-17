@@ -169,7 +169,7 @@ Here is an example configuration file::
     command = python sinks/graphite.py localhost 2003
 
     [sink_http_appName]
-    url = https://www.example.com/endpoint
+    url = https://monitoring-relay.twitter.com
     oauth_key = test_key
     oauth_secret = test_secret
     oauth_token_url = https://api.example.com/oauth2/token
