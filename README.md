@@ -88,7 +88,7 @@ The HyperLogLog is based on the Google paper, "HyperLogLog in
 Practice: Algorithmic Engineering of a State of The Art Cardinality
 Estimation Algorithm".
 
-Install [BROKEN/INCOMPLETE]
+Install
 -------
 
 Download and build from source. This requires `scons` to be available,
