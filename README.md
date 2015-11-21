@@ -154,7 +154,7 @@ Usage
 -----
 
 Statsite is configured using a simple INI file.
-Here is an example configuration file::
+Here is an example configuration file for Twitter Observability::
 
     [statsite]
     port = 8125
@@ -164,15 +164,17 @@ Here is an example configuration file::
     flush_interval = 10
     timer_eps = 0.01
     set_eps = 0.02
-
+    
+    ;If dual writing metrics to both Twitter Observability via http & an exsting graphite/carbon instance
     [sink_stream_graphite]
     command = python sinks/graphite.py localhost 2003
-
+    
+    ;Twitter Observability http endpoint
     [sink_http_appName]
-    url = https://monitoring-relay.twitter.com/example-endpoint
+    url = https://monitoring-relay.twitter.com/cuckoo/v1/trusted/store
     oauth_key = test_key
     oauth_secret = test_secret
-    oauth_token_url = https://api.example.com/oauth2/token
+    oauth_token_url = https://api.twitter.com/oauth2/token
     
     [histogram_api]
     prefix=api
