@@ -195,7 +195,7 @@ Here is an example configuration file for Twitter Observability::
     prefix=
     min=0
     max=200
-    width=2
+    width=20
 
 Then run statsite, pointing it to that file::
 
