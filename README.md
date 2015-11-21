@@ -169,7 +169,7 @@ Here is an example configuration file for Twitter Observability::
     [sink_stream_graphite]
     command = python sinks/graphite.py localhost 2003
     
-    ;Twitter Observability http endpoint
+    ;Twitter Observability https endpoint
     [sink_http_appName]
     url = https://monitoring-relay.twitter.com/cuckoo/v1/trusted/store
     oauth_key = test_key
