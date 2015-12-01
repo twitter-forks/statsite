@@ -183,7 +183,8 @@ Here is an example configuration file for Twitter Observability::
     url = https://monitoring-relay.twitter.com/cuckoo/v1/trusted/store
     oauth_key = test_key
     oauth_secret = test_secret
-    oauth_token_url = https://api.twitter.com/oauth2/token 
+    oauth_token_url = https://api.twitter.com/oauth2/token
+    param_zone = myzone
     
     [histogram_api]
     prefix=api
@@ -290,6 +291,7 @@ HTTP sinks take the following options:
 * url : The URL of posting the metrics
 * oauth_key & oauth_secret : The OAuth identity and credential information 
 * oauth_token_url : The URL of authenticating the application of exchange the OAuth credentials for a bearer token
+* param_<key> : Set arbitrary HTTP url parameters on metric writes (e.g. 'zone', 'source', 'service')
 
 ### Histograms
 
