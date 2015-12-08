@@ -49,6 +49,7 @@ static int add_metrics(void* data,
     struct cb_info* info = (struct cb_info*)data;
     json_t* obj = info->jobject;
     const statsite_config* config = info->config;
+    const sink_config_http* httpconfig = info->httpconfig;
 
     /*
      * Scary looking macro to apply suffixes to a string, and then
@@ -62,12 +63,21 @@ static int add_metrics(void* data,
         json_object_set_new(obj, suffixed, val);                        \
     } while(0)
 
-    char* prefix = config->prefixes_final[type];
+    char* prefix = NULL;
+    uint16_t pre_len = 0;
+    if (httpconfig->use_prefix) {
+        prefix = config->prefixes_final[type];
+        pre_len = strlen(prefix);
+    }
     /* Using C99 stack allocation, don't panic */
-    int base_len = strlen(name) + strlen(prefix) + 1;
+    int base_len = strlen(name) + pre_len + 1;
     char full_name[base_len];
-    strcpy(full_name, prefix);
-    strcat(full_name, name);
+    if (pre_len > 0) {
+        strcpy(full_name, prefix);
+        strcat(full_name, name);
+    } else {
+        strcpy(full_name, name);
+    }
     switch (type) {
     case KEY_VAL:
         json_object_set_new(obj, full_name, json_real(*(double*)value));
