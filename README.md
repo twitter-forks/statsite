@@ -185,6 +185,7 @@ Here is an example configuration file for Twitter Observability::
     oauth_secret = test_secret
     oauth_token_url = https://api.twitter.com/oauth2/token
     use_prefix = true
+    param_zone = myzone
     
     [histogram_api]
     prefix=api
@@ -292,6 +293,7 @@ HTTP sinks take the following options:
 * oauth_key & oauth_secret : The OAuth identity and credential information 
 * oauth_token_url : The URL of authenticating the application of exchange the OAuth credentials for a bearer token
 * use_prefix : Whether to add global_prefix and type-specific prefixes (e.g. kv_prefix)
+* param_<key> : Set arbitrary HTTP url parameters on metric writes (e.g. 'zone', 'source', 'service')
 
 ### Histograms
 
