@@ -98,17 +98,9 @@ available usually through a system package manager.
 
 List of Dependencies (all must be installed before attempting to build):
 
- 1. jansson - (http://www.digip.org/jansson/)
+ 1. jansson (included in this repo, correctly reference in SConstruct buildfile - *no action needed*)
  
-  On Ubuntu
- ```
- $ sudo apt-get install libjansson4 libjansson-dev
- ```
-
-  On MacOS
- ```
- $ brew install jansson
- ```
+  https://github.com/twitter-forks/statsite/tree/master/deps/jansson
 
  2. inih (included in this repo, correctly reference in SConstruct buildfile - *no action needed*)
 
