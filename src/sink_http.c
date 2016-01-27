@@ -249,7 +249,7 @@ static int _add_metric_cb(void* data,
  * Callback function for dumping json object to string.
  * @arg buf The data buffer to dump.
  * @arg size Number of bytes to dump.
- * @arg buf d output buffer.
+ * @arg buf The output buffer.
  * @return 0 on success.
  */
 static int _json_cb(const char* buf, size_t size, void* d) {
