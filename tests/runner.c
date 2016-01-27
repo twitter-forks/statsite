@@ -15,6 +15,7 @@
 #include "test_lifoq.c"
 #include "test_strbuf.c"
 #include "test_utils.c"
+#include "test_sink_http.c"
 
 int main(void)
 {
@@ -35,6 +36,7 @@ int main(void)
     TCase *tc12 = tcase_create("lifoq");
     TCase *tc13 = tcase_create("strbuf");
     TCase *tc14 = tcase_create("utils");
+    TCase *tc15 = tcase_create("sink_http");
     SRunner *sr = srunner_create(s1);
     int nf;
 
@@ -172,6 +174,13 @@ int main(void)
     // Add the utils tests
     suite_add_tcase(s1, tc14);
     tcase_add_test(tc14, test_percentile_convertion);
+
+    // Add HTTP sink tests
+    suite_add_tcase(s1, tc15);
+    tcase_add_test(tc15, test_key_exists_in_query_string);
+    tcase_add_test(tc15, test_serialize_json_object);
+    tcase_add_test(tc15, test_serialize_kv);
+    tcase_add_test(tc15, test_serialize_parameters);
 
     srunner_run_all(sr, CK_ENV);
     nf = srunner_ntests_failed(sr);
