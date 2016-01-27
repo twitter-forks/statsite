@@ -22,7 +22,7 @@ CFLAGS = ["-Wall",
           "-g3",
           "-O3",
           "-pthread",
-          "-Ideps/inih", "-Ideps/libev", "-Isrc"]
+          "-Ideps/inih", "-Ideps/jansson", "-Ideps/libev", "-Isrc"]
 CFLAGS_ERROR = copy(CFLAGS)
 CFLAGS_ERROR.extend(["-Werror"])
 CFLAGS_LIBEV = copy(CFLAGS)
@@ -31,12 +31,17 @@ CFLAGS_LIBEV.extend(["-Wno-strict-aliasing",
                      "-Wno-unused-variable",
                      "-Wno-comment",
                      "-Wno-parentheses"])
+CFLAGS_LIBJANSSON = copy(CFLAGS)
+CFLAGS_LIBJANSSON.extend(["-DHAVE_CONFIG_H"])
 
 envmurmur = ENV.Clone(CPATH = ['deps/murmurhash/'], CFLAGS=" ".join(CFLAGS))
 murmur = envmurmur.Library('murmur', Glob("deps/murmurhash/*.c"))
 
 envinih = ENV.Clone(CPATH = ['deps/inih/'], CFLAGS= " ".join(CFLAGS))
 inih = envinih.Library('inih', Glob("deps/inih/*.c"))
+
+envjansson = ENV.Clone(CPATH = ['deps/jansson/'], CFLAGS= " ".join(CFLAGS_LIBJANSSON))
+jansson = envjansson.Library('jansson', Glob("deps/jansson/*.c"))
 
 env_statsite_with_err = ENV.Clone(CFLAGS = " ".join(CFLAGS_ERROR))
 env_statsite_without_err = ENV.Clone(CFLAGS = " ".join(CFLAGS))
@@ -64,7 +69,7 @@ objs = env_statsite_with_err.Object('src/hashmap', 'src/hashmap.c')           + 
         env_statsite_libev.Object('src/networking', 'src/networking.c')       + \
         env_statsite_libev.Object('src/conn_handler', 'src/conn_handler.c')
 
-statsite_libs = ["m", "pthread", murmur, inih, "jansson", curl_lib]
+statsite_libs = ["m", "pthread", murmur, inih, jansson, curl_lib]
 if platform.system() == 'Linux':
    statsite_libs.append("rt")
 
