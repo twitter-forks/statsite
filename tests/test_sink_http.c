@@ -21,10 +21,15 @@ START_TEST(test_key_exists_in_query_string)
     fail_unless(_key_exists_in_query_string("key", "test_string_key=1") == false);
     fail_unless(_key_exists_in_query_string("key", "test_string_key_abc") == false);
     fail_unless(_key_exists_in_query_string("key", "test_string_key_abc=1") == false);
+    fail_unless(_key_exists_in_query_string("", "test_string_key_abc=1") == false);
+    fail_unless(_key_exists_in_query_string("", "") == false);
+    fail_unless(_key_exists_in_query_string("long_key", "k=v") == false);
+    fail_unless(_key_exists_in_query_string("long_key", "") == false);
 
     fail_unless(_key_exists_in_query_string("key", "key") == true);
     fail_unless(_key_exists_in_query_string("key", "key=5") == true);
     fail_unless(_key_exists_in_query_string("key", "key&key1") == true);
+    fail_unless(_key_exists_in_query_string("key", "key=5&key1=1") == true);
 }
 END_TEST
 

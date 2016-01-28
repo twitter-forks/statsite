@@ -17,6 +17,7 @@
 const int QUEUE_MAX_SIZE = 10 * 1024 * 1024; /* 10 MB of data */
 const int DEFAULT_TIMEOUT_SECONDS = 30;
 const useconds_t FAILURE_WAIT = 5000000; /* 5 seconds */
+const int INITIAL_EXTRA_POST_BUFFER_SIZE = 128;
 
 const char* DEFAULT_CIPHERS_NSS = "ecdhe_ecdsa_aes_128_gcm_sha_256,ecdhe_rsa_aes_256_sha,rsa_aes_128_gcm_sha_256,rsa_aes_256_sha,rsa_aes_128_sha";
 const char* DEFAULT_CIPHERS_OPENSSL = "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA";
@@ -246,15 +247,15 @@ static int _add_metric_cb(void* data,
 }
 
 /*
- * Callback function for dumping json object to string.
- * @arg buf The data buffer to dump.
+ * Callback function for dumping json object to string buffer.
+ * @arg data The data to dump.
  * @arg size Number of bytes to dump.
- * @arg buf The output buffer.
+ * @arg output The output string buffer.
  * @return 0 on success.
  */
-static int _json_cb(const char* buf, size_t size, void* d) {
-    strbuf* sbuf = (strbuf*)d;
-    strbuf_cat(sbuf, buf, size);
+static int _json_dump_cb(const char* data, size_t size, void* output) {
+    strbuf* buf = (strbuf*)output;
+    strbuf_cat(buf, data, size);
     return 0;
 }
 
@@ -265,10 +266,10 @@ static int _json_cb(const char* buf, size_t size, void* d) {
  * @arg len The length of the string to append. 0 if the full string should be appended.
  * @arg curl The CURL object for string escaping.
  */
-static void _escape_and_append_to_buffer(strbuf* post_buf,
-                                         const char* value,
-                                         int len,
-                                         CURL* curl) {
+static void _escape_and_append(strbuf* post_buf,
+                               const char* value,
+                               int len,
+                               CURL* curl) {
     char* escaped_data = curl_easy_escape(curl, value, len);
     strbuf_cat(post_buf, escaped_data, strlen(escaped_data));
     curl_free(escaped_data);
@@ -276,7 +277,7 @@ static void _escape_and_append_to_buffer(strbuf* post_buf,
 
 /*
  * Verify if a key exists in a query string or not. This function simply scans
- * through the query string, hence it shouldn't be called often.
+ * through the query string, hence it shouldn't be called too often.
  * @arg key The key to search. It should not contain characters '&' and '='.
  * @arg partition_string The partition string to search in.
  * @return True if the key exists as a key name(as key in key=123 but not in key123=123)
@@ -288,10 +289,15 @@ bool _key_exists_in_query_string(const char* key,
         return false;
     }
 
-    int len = strlen(key);
+    int key_len = strlen(key);
+    int query_len = strlen(query_string);
+    if (key_len == 0 || query_len == 0) {
+        return false;
+    }
+
     do {
-        if (strncmp(query_string, key, len) == 0 &&
-            (query_string[len] == '=' || query_string[len] == '&' || query_string[len] == '\0')) {
+        if (strncmp(query_string, key, key_len) == 0 &&
+            (query_string[key_len] == '=' || query_string[key_len] == '&' || query_string[key_len] == '\0')) {
             return true;
         }
         query_string = strchr(query_string + 1, '&');
@@ -314,18 +320,18 @@ strbuf* _serialize_json_object(json_t* obj,
     strbuf* json_buf;
 
     strbuf_new(&json_buf, 0);
-    json_dump_callback(obj, _json_cb, (void*)json_buf, 0);
+    json_dump_callback(obj, _json_dump_cb, (void*)json_buf, 0);
     int json_len = 0;
     char* json_data = strbuf_get(json_buf, &json_len);
     strbuf* output = NULL;
 
     /* Many APIs reject empty metrics lists. We only process non-empty metrics. */
     if (json_len > 2) {
-        strbuf_new(&output, json_len + 128);
+        strbuf_new(&output, json_len + INITIAL_EXTRA_POST_BUFFER_SIZE);
 
         strbuf_cat(output, name, strlen(name));
         strbuf_cat(output, "=", 1);
-        _escape_and_append_to_buffer(output, json_data, json_len, curl);
+        _escape_and_append(output, json_data, json_len, curl);
     }
     
     strbuf_free(json_buf, true);
@@ -357,7 +363,7 @@ void _serialize_kv(strbuf* buf, const char* key, const char* value, CURL* curl) 
      }
 
     if (curl != NULL) {
-        _escape_and_append_to_buffer(buf, value, 0, curl);
+        _escape_and_append(buf, value, 0, curl);
     } else {
         strbuf_cat(buf, value, strlen(value));
     }
@@ -388,7 +394,7 @@ void _serialize_parameters(strbuf* buf, const char* partition, const kv_config* 
      * in the partition data.
      */
     for (; params != NULL; params = params->next) {
-        if (!_key_exists_in_query_string(params->k, partition)) {
+        if (strlen(params->k) > 0 && !_key_exists_in_query_string(params->k, partition)) {
             _serialize_kv(buf, params->k, params->v, curl);
         }
     }
