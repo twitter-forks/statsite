@@ -49,7 +49,10 @@ START_TEST(test_serialize_json_object) {
     int len;
     char* data = strbuf_get(buf, &len);
     fail_unless(len == 66);
-    fail_unless(strcmp(data, "json=%7B%22test_real%22%3A%20100.0%2C%20%22test_int%22%3A%20101%7D") == 0);
+
+    const char* toCompare1 = "json=%7B%22test_real%22%3A%20100.0%2C%20%22test_int%22%3A%20101%7D";
+    const char* toCompare2 = "json=%7B%22test_int%22%3A%20101%2C%20%22test_real%22%3A%20100.0%7D";
+    fail_unless(strcmp(data, toCompare1) == 0 || strcmp(data, toCompare2) == 0);
 
     curl_easy_cleanup(curl);
     strbuf_free(buf, true);
