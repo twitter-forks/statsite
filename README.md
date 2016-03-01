@@ -178,6 +178,8 @@ Here is an example configuration file for Twitter Observability::
     oauth_token_url = https://api.twitter.com/oauth2/token
     use_prefix = true
     param_zone = myzone
+    param_service = myservice
+    param_source = thishost
     
     [histogram_api]
     prefix=api
