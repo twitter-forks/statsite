@@ -100,6 +100,7 @@ static void _add_metric_to_json(json_t* obj,
         strncat(full_name, name, name_len);
     } else {
         strncpy(full_name, name, name_len);
+        full_name[base_len - 1] = '\0';
     }
     switch (type) {
     case KEY_VAL:
