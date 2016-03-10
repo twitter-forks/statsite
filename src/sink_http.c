@@ -60,6 +60,29 @@ struct jsonmap_cb_info {
     struct http_sink* sink;
 };
 
+/**
+ * Build full name for metric from prefix and metric names and store it
+ * into a buffer.
+ * @arg buffer The output buffer for the full name. It MUST have enough space.
+ * @arg prefix The prefix string.
+ * @arg pre_len The prefix string length.
+ * @arg name The metirc key.
+ * @arg name_len The metirc key length.
+ */
+static void _build_full_name(char* buffer,
+                             const char* prefix,
+                             int pre_len,
+                             const char* name,
+                             int name_len) {
+    if (pre_len > 0 && prefix != NULL) {
+        strncpy(buffer, prefix, pre_len);
+        buffer[pre_len] = '\0';
+        strncat(buffer, name, name_len);
+    } else {
+        strncpy(buffer, name, name_len);
+        buffer[name_len] = '\0';
+    }
+}
 
 /*
  * Add a metric into the output json object.
@@ -95,13 +118,8 @@ static void _add_metric_to_json(json_t* obj,
     /* Using C99 stack allocation, don't panic */
     int base_len = name_len + pre_len + 1;
     char full_name[base_len];
-    if (pre_len > 0) {
-        strcpy(full_name, prefix);
-        strncat(full_name, name, name_len);
-    } else {
-        strncpy(full_name, name, name_len);
-        full_name[base_len - 1] = '\0';
-    }
+    _build_full_name(full_name, prefix, pre_len, name, name_len);
+
     switch (type) {
     case KEY_VAL:
         json_object_set_new(obj, full_name, json_real(*(double*)value));

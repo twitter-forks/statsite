@@ -60,6 +60,30 @@ START_TEST(test_serialize_json_object) {
 }
 END_TEST
 
+START_TEST(test_build_full_name) {
+    char buffer[128];  // Enough for the tests.
+    // No prefix when prefix is NULL or pre_len is 0.
+    _build_full_name(buffer, NULL, 0, "test_metric", 11);
+    fail_unless(strcmp(buffer, "test_metric") == 0);
+    _build_full_name(buffer, "dummy_", 0, "test_metric", 11);
+    fail_unless(strcmp(buffer, "test_metric") == 0);
+    _build_full_name(buffer, NULL, 100, "test_metric", 11);
+    fail_unless(strcmp(buffer, "test_metric") == 0);
+    // Build correct full name if pre_len is not the length of string.
+    _build_full_name(buffer, "dummy_extra_character", 6, "test_metric", 11);
+    fail_unless(strcmp(buffer, "dummy_test_metric") == 0);
+    _build_full_name(buffer, "dummy_", 100, "test_metric", 11);
+    fail_unless(strcmp(buffer, "dummy_test_metric") == 0);
+
+    // Build correct full name if name_len is less than the number of characters in name.
+    _build_full_name(buffer, "dummy_", 6, "test_metric_with_extra_character", 11);
+    fail_unless(strcmp(buffer, "dummy_test_metric") == 0);
+    // Build correct full name if name_len is greater than the number of characters in name.
+    _build_full_name(buffer, "dummy_", 6, "test_metric_with_extra_character", 100);
+    fail_unless(strcmp(buffer, "dummy_test_metric_with_extra_character") == 0);
+}
+END_TEST
+
 START_TEST(test_serialize_kv) {
     strbuf* buf;
     int len;
