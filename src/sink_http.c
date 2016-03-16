@@ -551,10 +551,24 @@ static void _http_curl_basic_setup(CURL* curl,
 }
 
 /*
+ * Build USERPWD string to be used by curl.
+ * @arg buf The buffer to receive the result. It should be at least strlen(username) + strlen(password) + 2
+ *      bytes long.
+ * @arg username The user name string.
+ * @arg password The password string.
+ */
+static void _build_user_pwd(char* buf, const char* username, const char* password) {
+    strcpy(buf, username);
+    strcat(buf, ":");
+    strcat(buf, password);
+}
+
+/*
  * A helper to try to authenticate to an OAuth2 token endpoint
  */
 static int _oauth2_get_token(const sink_config_http* httpconfig, struct http_sink* sink) {
     char* error_buffer = malloc(CURL_ERROR_SIZE + 1);
+    char* user_pwd = NULL;
     strbuf* recv_buf;
     strbuf_new(&recv_buf, 16384);
 
@@ -571,8 +585,15 @@ static int _oauth2_get_token(const sink_config_http* httpconfig, struct http_sin
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(OAUTH2_GRANT));
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, OAUTH2_GRANT);
     curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+#if defined(CURLOPT_USERNAME) && defined(CURLOPT_PASSWORD)
     curl_easy_setopt(curl, CURLOPT_USERNAME, httpconfig->oauth_key);
     curl_easy_setopt(curl, CURLOPT_PASSWORD, httpconfig->oauth_secret);
+#else  // Older libcurl uses CURLOPT_USERPWD option.
+    int user_pwd_length = strlen(httpconfig->oauth_key) + strlen(httpconfig->oauth_secret);
+    user_pwd = malloc(user_pwd_length + 2);
+    _build_user_pwd(user_pwd, httpconfig->oauth_key, httpconfig->oauth_secret);
+    curl_easy_setopt(curl, CURLOPT_USERPWD, user_pwd);
+#endif
 
     CURLcode rcurl = curl_easy_perform(curl);
     long http_code = 0;
@@ -607,6 +628,7 @@ exit:
 
     curl_easy_cleanup(curl);
     free(error_buffer);
+    free(user_pwd);
     strbuf_free(recv_buf, true);
     return 0;
 }
