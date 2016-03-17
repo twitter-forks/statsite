@@ -173,6 +173,8 @@ Here is an example configuration file for Twitter Observability::
     ;
     [sink_http_appName]
     url = https://monitoring-relay.twitter.com/cuckoo/v1/trusted/store
+    queue_size_mb = 10
+    time_out_seconds = 30
     oauth_key = test_key
     oauth_secret = test_secret
     oauth_token_url = https://api.twitter.com/oauth2/token

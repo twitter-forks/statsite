@@ -14,8 +14,6 @@
 #include "strbuf.h"
 #include "utils.h"
 
-const int QUEUE_MAX_SIZE = 10 * 1024 * 1024; /* 10 MB of data */
-const int DEFAULT_TIMEOUT_SECONDS = 30;
 const useconds_t FAILURE_WAIT = 5000000; /* 5 seconds */
 const int INITIAL_EXTRA_POST_BUFFER_SIZE = 128;
 
@@ -26,7 +24,7 @@ const char* USERAGENT = "statsite-http/0";
 const char* OAUTH2_GRANT = "grant_type=client_credentials";
 
 char* DEFAULT_PARTITION = "";
-int PARTITION_DELIMITER = '?';
+const int PARTITION_DELIMITER = '?';
 
 /*
  * Data from the HTTP sink.
@@ -425,14 +423,14 @@ static int _json_serialize_cb(void* data, const char* key, void* value) {
     int post_len = 0;
     char* post_data = strbuf_get(post_buf, &post_len);
 
-    int push_ret = lifoq_push(sink->queue, post_data, post_len, true, false);
+    int push_ret = lifoq_push(sink->queue, post_data, post_len, false, true);
     if (push_ret) {
-        syslog(LOG_ERR, "HTTP Sink couldn't enqueue a %d size buffer - rejected code %d",
-               post_len, push_ret);
+        syslog(LOG_ERR, "HTTP Sink couldn't enqueue a %d size buffer for key %s - rejected code %d",
+               post_len, key, push_ret);
     }
 
-    /* Free the buffer object but keep the data */
-    strbuf_free(post_buf, false);
+    /* Free the buffer object */
+    strbuf_free(post_buf, true);
 
     return 0;
 }
@@ -540,7 +538,7 @@ static void _http_curl_basic_setup(CURL* curl,
                                   strbuf* recv_buf,
                                   const char* ssl_ciphers) {
     /* Setup HTTP parameters */
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, DEFAULT_TIMEOUT_SECONDS);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, httpconfig->time_out_seconds);
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error_buffer);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, recv_buf);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _recv_cb);
@@ -725,7 +723,7 @@ sink* init_http_sink(const sink_config_http* sc, const statsite_config* config) 
     s->sink.command = (int (*)(sink*, metrics*, void*))_serialize_metrics;
     s->sink.close = (void (*)(sink*))_close_sink;
 
-    lifoq_new(&s->queue, QUEUE_MAX_SIZE);
+    lifoq_new(&s->queue, sc->queue_size_mb * 1024 * 1024);
     pthread_create(&s->worker, NULL, _http_worker, (void*)s);
 
     return (sink*)s;
