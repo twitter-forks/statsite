@@ -177,6 +177,8 @@ Here is an example configuration file for Twitter Observability::
     oauth_secret = test_secret
     oauth_token_url = https://api.twitter.com/oauth2/token
     use_prefix = true
+    queue_size_mb = 10
+    time_out_seconds = 30
     param_zone = myzone
     param_service = myservice
     param_source = thishost

@@ -90,7 +90,9 @@ static const sink_config_http DEFAULT_HTTP_SINK = {
     .oauth_key = NULL,
     .oauth_secret = NULL,
     .oauth_token_url = NULL,
-    .use_prefix = true
+    .use_prefix = true,
+    .queue_size_mb = 10, /* HTTP post queue size in MB */
+    .time_out_seconds = 30 /* HTTP post request timeout in seconds */
 };
 
 /**
@@ -319,6 +321,10 @@ static int sink_callback(void* user, const char* section, const char* name, cons
             config->oauth_token_url = strdup(value);
         } else if (NAME_MATCH("use_prefix")) {
             value_to_bool(value, &config->use_prefix);
+        } else if (NAME_MATCH("queue_size_mb")) {
+            value_to_int(value, &config->queue_size_mb);
+        } else if (NAME_MATCH("time_out_seconds")) {
+            value_to_int(value, &config->time_out_seconds);
         } else {
             /* Attempt to locate keys
              * of the form param_PNAME */

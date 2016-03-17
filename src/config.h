@@ -69,6 +69,8 @@ typedef struct sink_config_http {
     const char* oauth_secret; /* OAuth2 Secret */
     const char* oauth_token_url; /* URL to get a new token from */
     bool use_prefix; /* Whether to prefix metric keys */
+    int queue_size_mb; /* HTTP post queue size in MB */
+    int time_out_seconds; /* HTTP post request timeout in seconds */
 } sink_config_http;
 
 // Represents the configuration of a histogram
