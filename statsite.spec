@@ -2,7 +2,7 @@
 
 Name:		statsite
 Version:	0.7.2
-Release:	10%{?dist}
+Release:	11%{?dist}
 Summary:	A C implementation of statsd.
 Group:		Applications
 License:	See the LICENSE file.
@@ -127,7 +127,12 @@ exit 0
 %attr(755, root, root) /usr/libexec/statsite/sinks/opentsdb.js
 
 %changelog
-* Mon Feb 29 2016 Ning Wang - 0.7.2.10
+* Thu Mar 17 2016 Ning Wang - 0.7.2-11
+- Fix metric name bug when there is no prefix
+- Make queue size and timeout configureable
+- Make queue full an error
+
+* Mon Feb 29 2016 Ning Wang - 0.7.2-10
 - Add libjasson into deps
 - Add metric partitioning support
 
