@@ -442,14 +442,15 @@ static int _json_serialize_cb(void* data, const char* key, void* value) {
     int post_len = 0;
     char* post_data = strbuf_get(post_buf, &post_len);
 
-    int push_ret = lifoq_push(sink->queue, post_data, post_len, false, true);
+    int push_ret = lifoq_push(sink->queue, post_data, post_len, true, true);
     if (push_ret) {
         syslog(LOG_ERR, "HTTP Sink couldn't enqueue a %d size buffer for key %s - rejected code %d",
                post_len, key, push_ret);
+        free(post_data);
     }
 
     /* Free the buffer object */
-    strbuf_free(post_buf, true);
+    strbuf_free(post_buf, false);
 
     return 0;
 }
@@ -683,8 +684,10 @@ static void* _http_worker(void* arg) {
 
         if (should_authenticate && s->oauth_bearer == NULL) {
             if (!_oauth2_get_token(httpconfig, s)) {
-                if (lifoq_push(s->queue, data, data_size, true, true))
+                if (lifoq_push(s->queue, data, data_size, true, true)) {
                     syslog(LOG_ERR, "HTTP: dropped data due to queue full of closed");
+                    free(data);
+                }
                 continue;
             }
         }
