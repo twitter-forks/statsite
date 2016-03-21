@@ -726,8 +726,10 @@ static void* _http_worker(void* arg) {
 
             syslog(LOG_ERR, "HTTP: error %d: %s %s", rcurl, error_buffer, recv_data);
             /* Re-enqueue data */
-            if (lifoq_push(s->queue, data, data_size, true, true))
+            if (lifoq_push(s->queue, data, data_size, true, true)) {
                 syslog(LOG_ERR, "HTTP: dropped data due to queue full of closed");
+                free(data);
+            }
 
             /* Remove any authentication token - this will cause us to get a new one */
             if (s->oauth_bearer) {
