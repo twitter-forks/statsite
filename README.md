@@ -502,3 +502,15 @@ To enable the binary sink protocol, add a configuration variable `binary_stream`
 to the configuration file with the value `yes`. An example sink is provided in
 `sinks/binary_sink.py`.
 
+Docker
+------
+
+Building with Docker
+```bash
+docker build -t statsite:latest .
+```
+
+Running 
+```bash
+docker run --net=host -v twitter-monitoring-relay.conf:/etc/statsite.conf --name statsite --rm statsite:latest /statsite/statsite -f /etc/statsite.conf
+```
