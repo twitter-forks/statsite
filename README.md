@@ -151,13 +151,13 @@ Here is an example configuration file for Twitter Observability::
 
     ; Default Twitter statsite config for external Twitter customers
     ; that are using Twitter Observability via our https endpoint.
-    ;
+    ; Cuckoo stores values minutely, so you should flush on a minutely basis.
     [statsite]
     port = 8125
     udp_port = 8125
     log_level = INFO
     log_facility = local0
-    flush_interval = 10
+    flush_interval = 60 
     timer_eps = 0.01
     set_eps = 0.02
     
@@ -226,7 +226,8 @@ options must exist in the `statsite` section of the INI file:
   local6, local7. All logs go to syslog.
 
 * flush\_interval : How often the metrics should be flushed to the
-  sink in seconds. Defaults to 10 seconds.
+  sink in seconds. Defaults to 60 seconds so that we are matching how 
+  Cuckoo buckets metrics.
 
 * timer\_eps : The upper bound on error for timer estimates. Defaults
   to 1%. Decreasing this value causes more memory utilization per timer.
