@@ -74,7 +74,7 @@ if platform.system() == 'Linux':
    statsite_libs.append("rt")
 
 statsite = env_statsite_with_err.Program('statsite', objs + ["src/statsite.c"], LIBS=statsite_libs)
-statsite_test = env_statsite_without_err.Program('test_runner', objs + Glob("tests/runner.c"), LIBS=statsite_libs + ["check"])
+statsite_test = env_statsite_without_err.Program('test_runner', objs + Glob("tests/runner.c"), LIBS=statsite_libs + ["check", "subunit"])
 
 # By default, only compile statsite
 Default(statsite)
