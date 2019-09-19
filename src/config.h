@@ -73,6 +73,19 @@ typedef struct sink_config_http {
     int time_out_seconds; /* HTTP post request timeout in seconds */
 } sink_config_http;
 
+typedef struct included_metrics_config {
+    bool count;
+    bool mean;
+    bool stdev;
+    bool sum;
+    bool sum_sq;
+    bool lower;
+    bool upper;
+    bool rate;
+    bool median;
+    bool sample_rate;
+} included_metrics_config;
+
 // Represents the configuration of a histogram
 typedef struct histogram_config {
     char *prefix;
@@ -112,6 +125,8 @@ typedef struct {
     char* prefixes[METRIC_TYPES];
     char* prefixes_final[METRIC_TYPES];
     bool extended_counters;
+    included_metrics_config ext_counters_config;
+    included_metrics_config timers_config;
     bool prefix_binary_stream;
     int num_quantiles;
     double* quantiles;

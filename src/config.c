@@ -60,7 +60,9 @@ static const statsite_config DEFAULT_CONFIG = {
     "",                 // Global prefix
     {"", "kv.", "gauges.", "counts.", "timers.", "sets.", ""},
     {},
-    false,              // Extended counts off by default
+    false,              // Extended counters off by default
+    {true, true, true, true, true, true, true, true, false, false},   // All extended counter metrics except sample_rate and median
+    {true, true, true, true, true, true, true, true, true, true},   // All timer metrics on by default
     false,              // Do not prefix binary stream by default
                         // Number of quantiles
     sizeof(default_quantiles) / sizeof(double),
@@ -168,6 +170,52 @@ static int value_to_list_of_doubles(const char *val, double **result, int *count
     sscanf(val, " %n", &scanned);
 
     return val[scanned] == '\0';
+}
+
+
+/**
+* Parsing the extended counters config
+* @arg config The global config
+* @arg value the extended counters to be used
+*
+*/
+included_metrics_config csv_to_included_metrics_config(const char *value)
+{
+
+    included_metrics_config included_metrics_cfg = (included_metrics_config){false, false, false, false, false, false, false, false};
+
+    char* token;
+
+    char s[256];
+    strcpy(s, value);
+    token = strtok(s,",");
+    while( token != NULL )
+    {
+        if (strcasecmp(token, "COUNT") == 0){
+            included_metrics_cfg.count = true;
+        } else if(strcasecmp(token, "MEAN") == 0){
+            included_metrics_cfg.mean = true;
+        } else if (strcasecmp(token, "STDEV") == 0){
+            included_metrics_cfg.stdev = true;
+        } else if (strcasecmp(token, "SUM") == 0){
+            included_metrics_cfg.sum = true;
+        } else if (strcasecmp(token, "SUM_SQ") == 0){
+            included_metrics_cfg.sum_sq = true;
+        } else if (strcasecmp(token, "LOWER") == 0){
+            included_metrics_cfg.lower = true;
+        } else if (strcasecmp(token, "UPPER") == 0){
+            included_metrics_cfg.upper = true;
+        } else if (strcasecmp(token, "RATE") == 0){
+            included_metrics_cfg.rate = true;
+        } else if (strcasecmp(token, "MEDIAN") == 0){
+            included_metrics_cfg.median = true;
+        } else if (strcasecmp(token, "SAMPLE_RATE") == 0){
+            included_metrics_cfg.sample_rate = true;
+        }
+        token = strtok(NULL, ",");
+    }
+
+    return included_metrics_cfg;
 }
 
 /**
@@ -488,13 +536,15 @@ static int config_callback(void* user, const char* section, const char* name, co
         config->prefixes[TIMER] = strdup(value);
     } else if (NAME_MATCH("sets_prefix")) {
         config->prefixes[SET] = strdup(value);
+    } else if (NAME_MATCH("extended_counters_include")) {
+        config->ext_counters_config = csv_to_included_metrics_config(value);
+    } else if (NAME_MATCH("timers_include")) {
+        config->timers_config = csv_to_included_metrics_config(value);
     } else if (NAME_MATCH("kv_prefix")) {
         config->prefixes[KEY_VAL] = strdup(value);
-
     // Copy the multi-case variables
     } else if (NAME_MATCH("log_facility")) {
         return name_to_facility(value, &config->syslog_log_facility);
-
     // Unknown parameter?
     } else {
         // Log it, but ignore
