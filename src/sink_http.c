@@ -21,7 +21,7 @@ const int INITIAL_EXTRA_POST_BUFFER_SIZE = 128;
  * Updated: 2019-09-20
  * go/ciphers
  */
-const char* DEFAULT_CIPHERS_NSS = "ecdhe_ecdsa_aes_256_gcm_sha_384:ecdhe_rsa_aes_256_gcm_sha_384:ecdhe_ecdsa_aes_128_gcm_sha_256:ecdhe_rsa_aes_128_gcm_sha_256:ecdhe_ecdsa_aes_256_sha_384:ecdhe_rsa_aes_256_sha_384:ecdhe_ecdsa_aes_128_sha:ecdhe_rsa_aes_128_sha:aes_256_gcm_sha_384:aes_128_gcm_sha_256";
+const char* DEFAULT_CIPHERS_NSS = "ecdhe_ecdsa_aes_128_gcm_sha_256,ecdhe_rsa_aes_128_gcm_sha_256,ecdhe_ecdsa_aes_256_gcm_sha_384,ecdhe_rsa_aes_256_gcm_sha_384,ecdhe_ecdsa_aes_128_cbc_sha_256,ecdhe_rsa_aes_128_cbc_sha_256,ecdhe_ecdsa_aes_256_sha_384,ecdhe_rsa_aes_256_sha_384,ecdhe_ecdsa_aes_128_sha,ecdhe_rsa_aes_128_sha,ecdhe_ecdsa_aes_256_sha,ecdhe_rsa_aes_256_sha,rsa_aes_128_gcm_sha_256,rsa_aes_256_gcm_sha_384,rsa_aes_128_cbc_sha_256,rsa_aes_256_cbc_sha_256,rsa_aes_128_sha,rsa_aes_256_sha";
 const char* DEFAULT_CIPHERS_OPENSSL = "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256";
 
 const char* USERAGENT = "statsite-http/0";
